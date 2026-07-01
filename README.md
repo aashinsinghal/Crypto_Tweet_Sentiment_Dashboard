@@ -7,4 +7,14 @@ After downloading a dataset of over 75000 tweets from Kaggle, the attached scrip
 
 Using these sentiment polarity figures, I created several key visualizations in Tableau including average sentiment by region, a word cloud of the most frequent words used in the tweets analyzed, and a sentiment polarity bar graph indicating the volume of tweets at each sentiment.
 
+## Local Tweet Exports
+
+`generalCleaningTweets.py` still reads `crypto-query-tweets.csv` by default, and
+it now accepts common tweet export columns from TweetClaw, OpenClaw workflows,
+and simple CSV datasets.
+
+Supported tweet text columns are `tweet_text`, `text`, `tweet`, `content`, and
+`full_text`. Optional follower columns such as `followers`, `followers_count`,
+or `user_followers` keep the existing follower-count filter. Optional user bio
+columns such as `description` or `bio` are normalized to `user_description`.
 

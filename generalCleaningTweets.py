@@ -4,10 +4,45 @@ import string
 from textblob import TextBlob
 import emoji
 
-df = pd.read_csv('crypto-query-tweets.csv', encoding='utf-8')
+TEXT_COLUMNS = ['tweet_text', 'text', 'tweet', 'content', 'full_text']
+FOLLOWER_COLUMNS = ['followers_count', 'followers', 'user_followers']
+DESCRIPTION_COLUMNS = ['user_description', 'description', 'bio']
+
+def first_matching_column(df, candidates):
+    normalized = {str(column).strip().lower(): column for column in df.columns}
+    for candidate in candidates:
+        column = normalized.get(candidate.lower())
+        if column is not None:
+            return column
+    return None
+
+def load_tweet_export(path='crypto-query-tweets.csv'):
+    df = pd.read_csv(path, encoding='utf-8')
+    text_column = first_matching_column(df, TEXT_COLUMNS)
+    if text_column is None:
+        raise ValueError("CSV must include tweet_text, text, tweet, content, or full_text.")
+
+    normalized = df.copy()
+    normalized['tweet_text'] = normalized[text_column].fillna('').astype(str)
+
+    follower_column = first_matching_column(normalized, FOLLOWER_COLUMNS)
+    if follower_column is None:
+        normalized['followers_count'] = 11
+    elif follower_column != 'followers_count':
+        normalized['followers_count'] = pd.to_numeric(normalized[follower_column], errors='coerce').fillna(0)
+
+    description_column = first_matching_column(normalized, DESCRIPTION_COLUMNS)
+    if description_column is None:
+        normalized['user_description'] = ''
+    elif description_column != 'user_description':
+        normalized['user_description'] = normalized[description_column].fillna('').astype(str)
+
+    return normalized
+
+df = load_tweet_export()
 
 # Filter tweets out from accounts with < 10 followers
-trimmed_tweets = df[df['followers_count'] > 10]
+trimmed_tweets = df[df['followers_count'] > 10].copy()
 
 # Define stop words
 stop_words = {
